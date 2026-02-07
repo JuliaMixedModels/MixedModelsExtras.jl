@@ -16,7 +16,7 @@
     end
 
     @testset "_ranef error path" begin
-       @suppress @test_throws PosDefException _ranef(m1, 1e12 .* m1.optsum.initial)
+        @suppress @test_throws PosDefException _ranef(m1, 1e12 .* m1.optsum.initial)
     end
 end
 

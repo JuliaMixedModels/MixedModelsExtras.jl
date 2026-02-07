@@ -2,7 +2,7 @@
     model = fit(MixedModel, @formula(reaction ~ 1 + (1 | subj)), dataset(:sleepstudy);
                 progress)
     @test icc(model, :subj) == icc(model, [:subj]) == icc(model)
-    @test icc(model, :subj) ≈ 0.37918288 rtol=1e-6
+    @test icc(model, :subj) ≈ 0.37918288 rtol = 1e-6
 
     formula = @formula(rt_trunc ~ 1 + spkr * prec * load +
                                   (1 + spkr | subj) +
@@ -27,7 +27,7 @@ end
     cbpp = dataset(:cbpp)
     # suppress depwarn on wts vs weights
     model = @suppress fit(MixedModel, @formula((incid / hsz) ~ 1 + (1 | herd)),
-                cbpp, Binomial(); wts=float(cbpp.hsz), progress)
+                          cbpp, Binomial(); wts=float(cbpp.hsz), progress)
     @test icc(model, :herd) == icc(model, [:herd]) == icc(model)
     @test icc(model, :herd) ≈ 0.1668 atol = 0.0005
 end
@@ -39,7 +39,8 @@ end
     # force treating as a Binomial model
     # suppress depwarn on wts vs weights
     modelbin = @suppress fit(MixedModel, @formula(use ~ 1 + (1 | urban & dist)),
-                   contra, Binomial(); fast=true, wts=ones(length(contra.dist)), progress)
+                             contra, Binomial(); fast=true, wts=ones(length(contra.dist)),
+                             progress)
     # Bernoullis are a special case of binomial, so make sure they give the same answer
     @test icc(modelbern, Symbol("urban & dist")) ≈ icc(modelbin, Symbol("urban & dist"))
 
