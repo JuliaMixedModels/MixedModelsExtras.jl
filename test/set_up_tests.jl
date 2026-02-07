@@ -5,6 +5,7 @@ using GLM
 using LinearAlgebra
 using MixedModels
 using MixedModelsExtras
+using Suppressor
 using StableRNGs
 using Statistics
 using StatsBase
