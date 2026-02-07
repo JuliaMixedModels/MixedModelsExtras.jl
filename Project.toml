@@ -21,6 +21,7 @@ LinearAlgebra = "1"
 MixedModels = "4, 5"
 MixedModelsDatasets = "0.1"
 RDatasets = "0.7.7, 0.8"
+Suppressor = "0.2.8"
 StableRNGs = "1"
 Statistics = "1"
 StatsBase = "0.33, 0.34"
@@ -36,7 +37,8 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 MixedModelsDatasets = "7e9fb7ac-9f67-43bf-b2c8-96ba0796cbb6"
 RDatasets = "ce6b1742-4840-55fa-b093-852dadbb1d8b"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
+Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Aqua", "DataFrames", "Distributions", "MixedModelsDatasets", "RDatasets", "StableRNGs"]
+test = ["Test", "Aqua", "DataFrames", "Distributions", "MixedModelsDatasets", "RDatasets", "Suppressor", "StableRNGs"]

@@ -16,7 +16,7 @@
     end
 
     @testset "_ranef error path" begin
-        @test_throws PosDefException _ranef(m1, 1e12 .* m1.optsum.initial)
+        @suppress @test_throws PosDefException _ranef(m1, 1e12 .* m1.optsum.initial)
     end
 end
 
@@ -41,6 +41,6 @@ end
                     @formula(ticks ~ 1 + year + height + (1 | index) + (1 | brood) +
                                      (1 | location)),
                     grouseticks, Poisson(); fast=true, progress)
-        @test_throws ArgumentError _ranef(model, NaN .* model.optsum.initial)
+        @suppress @test_throws ArgumentError _ranef(model, NaN .* model.optsum.initial)
     end
 end
