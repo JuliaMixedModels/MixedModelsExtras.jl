@@ -7,7 +7,7 @@ Required columns:
 - `model`: String representation of model, specified by the `label` kwarg.
 - `DoF`: model degrees of freedom 
 - `ΔAIC`: change in AIC from model with the lowest AIC value
-- `ΔAICc`: change in AICc from model with the lowest BIC value 
+- `ΔAICc`: change in AICc from model with the lowest AICc value
 - `ΔBIC`: change in BIC from model with the lowest BIC value
 
 In the future additional required columns may be added without being considered breaking.
