@@ -17,12 +17,12 @@ end
 # for MixedModelBootstrap
 # σtbl is boot.σs
 function _group_var(tbl, group::Symbol)
-    vals = map(values(_split_by_iter(tbl))) do iter
-        return sum(Tables.rows(iter)) do row
+    d = _split_by_iter(tbl)
+    return map(sort!(collect(keys(d)))) do key
+        return sum(Tables.rows(d[key])) do row
             return row.group == group ? abs2(row.σ) : 0
         end
     end
-    return vals
 end
 
 function _group_var(tbl)
