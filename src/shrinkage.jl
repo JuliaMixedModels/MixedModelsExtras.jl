@@ -12,8 +12,6 @@ function _ranef(m::LinearMixedModel, θref; uscale::Bool=false)
         ranef(updateL!(setθ!(m, θref)); uscale)
     catch e
         @error "Failed to compute unshrunken values with the following exception:"
-        # because we're re-throwing, the finally may never occur if things aren't caught
-        updateL!(setθ!(m, m.optsum.final)) # restore parameter estimates and update m
         rethrow(e)
     finally
         updateL!(setθ!(m, m.optsum.final)) # restore parameter estimates and update m
@@ -28,8 +26,6 @@ function _ranef(m::GeneralizedLinearMixedModel, θref; uscale::Bool=false)
         ranef(pirls!(setpar!(m, θref), fast, false); uscale) # not verbose
     catch e
         @error "Failed to compute unshrunken values with the following exception:"
-        # because we're re-throwing, the finally may never occur if things aren't caught
-        pirls!(setpar!(m, m.optsum.final), fast, false) # restore parameter estimates and update m
         rethrow(e)
     finally
         pirls!(setpar!(m, m.optsum.final), fast, false) # restore parameter estimates and update m
