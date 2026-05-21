@@ -105,7 +105,7 @@ icc(boot::MixedModelBootstrap, family) = icc(boot, family, propertynames(boot.fc
 
 function icc(boot::MixedModelBootstrap,
              groups::Union{Symbol,SymbolCollection})
-    any(ismissing, boot.σ) &&
+    all(ismissing, boot.σ) &&
         throw(ArgumentError("Bootstrapping GLMM requires specifying the family."))
     return _icc(boot.σs, groups, abs2.(boot.σ))
 end
