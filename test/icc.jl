@@ -20,6 +20,18 @@
         ci_item = shortestcovint(iccboot_item)
         @test first(ci_subj) < icc(model, :subj) < last(ci_subj)
         @test first(ci_item) < icc(model, :item) < last(ci_item)
+
+        # Regression test: per-iteration values must be in sorted iteration
+        # order so they align with boot.σ (residual σ, natural order).
+        iters = sort!(unique(row.iter for row in Tables.rows(boot.σs)))
+        σ²_subj_ref = [sum(abs2(row.σ)
+                           for row in Tables.rows(boot.σs)
+                           if row.iter == i && row.group == :subj; init=0.0)
+                       for i in iters]
+        σ²_all_ref = [sum(abs2(row.σ) for row in Tables.rows(boot.σs)
+                          if row.iter == i; init=0.0)
+                      for i in iters]
+        @test iccboot_subj ≈ σ²_subj_ref ./ (abs2.(boot.σ) .+ σ²_all_ref)
     end
 end
 

@@ -97,15 +97,20 @@ function _partial_fitted(model::MixedModel{T},
         group = Symbol(string(rt.trm))
         # @debug group
         # @debug group in keys(re)
-        !isnothing(get(re, group, nothing)) || mode == :exclude || continue
-        issubset(re[group], rt.cnames) ||
-            throw(ArgumentError("specified RE names for $(group) not subset of $(rt.cnames)"))
-        re_idx = if isempty(re[group])
-            BitVector(false for c in rt.cnames)
+        if !isnothing(get(re, group, nothing))
+            issubset(re[group], rt.cnames) ||
+                throw(ArgumentError("specified RE names for $(group) not subset of $(rt.cnames)"))
+            re_idx = if isempty(re[group])
+                BitVector(false for c in rt.cnames)
+            else
+                BitVector(c in re[group] for c in rt.cnames)
+            end
+            mode == :exclude && (re_idx = .!re_idx)
+        elseif mode == :exclude
+            re_idx = trues(length(rt.cnames))
         else
-            BitVector(c in re[group] for c in rt.cnames)
+            continue
         end
-        mode == :exclude && (re_idx = .!re_idx)
         # @debug re_idx
         # nothing to do
         all(==(0), re_idx) && continue

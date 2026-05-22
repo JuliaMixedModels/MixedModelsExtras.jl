@@ -22,6 +22,21 @@
     @test all(re_only .≈ re_only_pf)
 end
 
+@testset "LMM multi-group :exclude with partial re" begin
+    fm_kb07 = fit(MixedModel,
+                  @formula(rt_trunc ~ 1 + spkr * prec * load +
+                                      (1 + spkr | subj) + (1 | item)),
+                  dataset(:kb07); progress)
+
+    # When a group is absent from `re` in :exclude mode it should be treated as
+    # "exclude nothing" - i.e. all its RE are included.
+    pf_partial = partial_fitted(fm_kb07, String[],
+                                Dict(:subj => String[]); mode=:exclude)
+    pf_explicit = partial_fitted(fm_kb07, String[],
+                                 Dict(:subj => String[], :item => String[]); mode=:exclude)
+    @test all(pf_partial .≈ pf_explicit)
+end
+
 @testset "GLMM" begin
     contra = dataset(:contra)
     gm1 = fit(MixedModel, @formula(use ~ 1 + (1 | urban & dist)),

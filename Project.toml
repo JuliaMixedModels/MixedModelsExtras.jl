@@ -1,6 +1,6 @@
 name = "MixedModelsExtras"
 uuid = "781a26e1-49f4-409a-8f4c-c3159d78c17e"
-version = "2.3.1"
+version = "2.3.2"
 authors = ["Phillip Alday <me@phillipalday.com> and contributors"]
 
 [deps]
