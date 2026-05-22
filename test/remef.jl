@@ -30,8 +30,8 @@ end
 
     # When a group is absent from `re` in :exclude mode it should be treated as
     # "exclude nothing" - i.e. all its RE are included.
-    pf_partial  = partial_fitted(fm_kb07, String[],
-                                 Dict(:subj => String[]); mode=:exclude)
+    pf_partial = partial_fitted(fm_kb07, String[],
+                                Dict(:subj => String[]); mode=:exclude)
     pf_explicit = partial_fitted(fm_kb07, String[],
                                  Dict(:subj => String[], :item => String[]); mode=:exclude)
     @test all(pf_partial .≈ pf_explicit)
