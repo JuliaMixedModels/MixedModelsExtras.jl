@@ -11,7 +11,7 @@ fmzc = fit(MixedModel, @formula(reaction ~ 1 + days + zerocorr(1 + days | subj))
 lrt = likelihoodratiotest(fm0, fmzc, fm1)
 d0, dzc, d1 = deviance(fm0), deviance(fmzc), deviance(fm1)
 
-boot = bootstrap_lrt(StableRNG(42), 200, fm0, fmzc, fm1; 
+boot = bootstrap_lrt(StableRNG(42), 200, fm0, fmzc, fm1;
                      progress, optsum_overrides=(; maxfeval=500))
 
 @testset "bookkeeping matches the analytic LRT" begin
