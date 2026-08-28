@@ -1,7 +1,7 @@
 const SymbolCollection = Union{Symbol,Tuple{Symbol,Vararg{Symbol}},AbstractVector{Symbol}}
 
 function _group_var(vc::VarCorr, group::Symbol)
-    return sum(abs2, getproperty(getproperty(vc.σρ, group), :σ))
+    return sum(abs2, vc.σρ[group].σ)
 end
 
 function _group_var(vc::VarCorr)
@@ -19,9 +19,7 @@ end
 function _group_var(tbl, group::Symbol)
     d = _split_by_iter(tbl)
     return map(sort!(collect(keys(d)))) do key
-        return sum(Tables.rows(d[key])) do row
-            return row.group == group ? abs2(row.σ) : 0
-        end
+        return sum(abs2(row.σ) for row in Tables.rows(d[key]) if row.group == group; init=0)
     end
 end
 
@@ -33,7 +31,7 @@ end
 function _split_by_iter(tbl)
     d = Dict{Int,Vector}()
     for row in Tables.rows(tbl)
-        vv = get!(d, row.iter, Vector{Any}())
+        vv = get!(Vector{Any}, d, row.iter)
         push!(vv, row)
     end
     return d
