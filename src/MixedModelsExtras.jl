@@ -8,6 +8,7 @@ using StatsBase
 using StatsModels
 using Tables
 
+using MixedModels: replicate
 using GLM: linkinv, Link
 using MixedModels: replicate
 using StatsModels: termnames, vif, gvif
@@ -29,5 +30,8 @@ export shrinkagenorm, shrinkagetables
 
 include("bootstrap.jl")
 export bootstrap_lrt
+
+include("tables.jl")
+export ictable
 
 end

@@ -1,8 +1,4 @@
-using Aqua
-using LinearAlgebra
-using MixedModels
-using MixedModelsExtras
-using Test
+include("set_up_tests.jl")
 
 @testset "Aqua" begin
     # it's not piracy for StatsAPI.r2(::MixedModel), it's privateering!
@@ -30,4 +26,12 @@ end
 
 @testset "shrinkage" begin
     include("shrinkage.jl")
+end
+
+@testset "bootstrap" begin
+    include("bootstrap.jl")
+end
+
+@testset "tables" begin
+    include("tables.jl")
 end

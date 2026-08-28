@@ -1,16 +1,8 @@
-using MixedModels
-using MixedModels: dataset
-using MixedModelsExtras
-using Statistics
-using Test
-
 function _adjust(r2, model)
     n = nobs(model)
     p = dof(model)
     return 1 - (1 - r2) * (n - 1) / (n - p)
 end
-
-progress = false
 
 @testset "LMM" begin
     # can't use intercept-only FE because this leads to

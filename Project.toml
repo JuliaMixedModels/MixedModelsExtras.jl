@@ -1,7 +1,7 @@
 name = "MixedModelsExtras"
 uuid = "781a26e1-49f4-409a-8f4c-c3159d78c17e"
+version = "2.4.0"
 authors = ["Phillip Alday <me@phillipalday.com> and contributors"]
-version = "2.1.1"
 
 [deps]
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
@@ -16,28 +16,33 @@ Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 
 [compat]
 Aqua = "0.8"
-GLM = "1"
 DataFrames = "1"
 Distributions = "0.25"
+GLM = "1.9"
 LinearAlgebra = "1"
-MixedModels = "4"
+MixedModels = "5.9"
+MixedModelsDatasets = "0.2"
 ProgressMeter = "1"
-RDatasets = "0.7.7"
+Random = "1"
+RDatasets = "0.7.7, 0.8"
 StableRNGs = "1"
 Statistics = "1"
 StatsBase = "0.33, 0.34"
 StatsModels = "0.7.3"
+Suppressor = "0.2.8"
 Tables = "1"
 Test = "1"
-julia = "1.8"
+julia = "1.10"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+MixedModelsDatasets = "7e9fb7ac-9f67-43bf-b2c8-96ba0796cbb6"
 RDatasets = "ce6b1742-4840-55fa-b093-852dadbb1d8b"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
+Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Aqua", "DataFrames", "Distributions", "RDatasets", "StableRNGs"]
+test = ["Test", "Aqua", "DataFrames", "Distributions", "MixedModelsDatasets", "RDatasets", "Suppressor", "StableRNGs"]

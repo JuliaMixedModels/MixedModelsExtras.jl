@@ -1,7 +1,7 @@
 const SymbolCollection = Union{Symbol,Tuple{Symbol,Vararg{Symbol}},AbstractVector{Symbol}}
 
 function _group_var(vc::VarCorr, group::Symbol)
-    return sum(abs2, getproperty(getproperty(vc.σρ, group), :σ))
+    return sum(abs2, vc.σρ[group].σ)
 end
 
 function _group_var(vc::VarCorr)
@@ -17,12 +17,10 @@ end
 # for MixedModelBootstrap
 # σtbl is boot.σs
 function _group_var(tbl, group::Symbol)
-    vals = map(values(_split_by_iter(tbl))) do iter
-        return sum(Tables.rows(iter)) do row
-            return row.group == group ? abs2(row.σ) : 0
-        end
+    d = _split_by_iter(tbl)
+    return map(sort!(collect(keys(d)))) do key
+        return sum(abs2(row.σ) for row in Tables.rows(d[key]) if row.group == group; init=0)
     end
-    return vals
 end
 
 function _group_var(tbl)
@@ -33,7 +31,7 @@ end
 function _split_by_iter(tbl)
     d = Dict{Int,Vector}()
     for row in Tables.rows(tbl)
-        vv = get!(d, row.iter, Vector{Any}())
+        vv = get!(Vector{Any}, d, row.iter)
         push!(vv, row)
     end
     return d
@@ -105,7 +103,7 @@ icc(boot::MixedModelBootstrap, family) = icc(boot, family, propertynames(boot.fc
 
 function icc(boot::MixedModelBootstrap,
              groups::Union{Symbol,SymbolCollection})
-    any(ismissing, boot.σ) &&
+    all(ismissing, boot.σ) &&
         throw(ArgumentError("Bootstrapping GLMM requires specifying the family."))
     return _icc(boot.σs, groups, abs2.(boot.σ))
 end

@@ -1,4 +1,7 @@
 name: continuous-integration
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 on:
   push:
     branches:
@@ -17,33 +20,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        version: [1.8, 1]
-        arch: [x64]
-        os: [ubuntu-20.04] # macos-10.15, windows-2019
+        version: [min, 1]
+        os: [ubuntu-24.04] # macos-10.15, windows-2019
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
       - name: Julia Setup
-        uses: julia-actions/setup-julia@v1
+        uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
       - name: Cache
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+        uses: julia-actions/cache@v3
       - name: Build
         uses: julia-actions/julia-buildpkg@v1
       - name: Test
@@ -52,9 +39,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Coverage Process
         uses: julia-actions/julia-processcoverage@v1
-        if:  ${{ startsWith(matrix.os, 'ubuntu') && (matrix.version == '1') }}
       - name: Coverage Upload
-        uses: codecov/codecov-action@v1
-        if:  ${{ startsWith(matrix.os, 'ubuntu') && (matrix.version == '1') }}
+        uses: codecov/codecov-action@v6
         with:
-          file: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: JuliaMixedModels/MixedModelsExtras.jl
