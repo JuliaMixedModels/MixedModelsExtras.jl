@@ -17,7 +17,7 @@ export termnames, gvif, vif
 StatsModels.termnames(::RandomEffectsTerm) = String[]
 
 include("icc.jl")
-export icc, confint
+export icc, confint, IccBootstrap
 
 include("r2.jl")
 export r², r2, adjr², adjr2

@@ -34,16 +34,19 @@
         @test iccboot_subj ≈ σ²_subj_ref ./ (abs2.(boot.σ) .+ σ²_all_ref)
 
         @testset "confint" begin
-            @test confint(boot, :subj) == shortestcovint(iccboot_subj)
-            @test confint(boot, :subj) == shortestcovint(iccboot_subj, 0.95)
-            @test confint(boot, :subj; level=0.8) == shortestcovint(iccboot_subj, 0.8)
-            @test confint(boot, [:subj, :item]) == shortestcovint(icc(boot))
+            @test iccboot_subj isa MixedModelsExtras.IccBootstrap
+            @test iccboot_subj isa AbstractVector{Float64}
 
-            lo, hi = confint(boot, :subj; method=:equaltail)
+            @test confint(iccboot_subj) == shortestcovint(iccboot_subj)
+            @test confint(iccboot_subj) == shortestcovint(iccboot_subj, 0.95)
+            @test confint(iccboot_subj; level=0.8) == shortestcovint(iccboot_subj, 0.8)
+            @test confint(icc(boot, [:subj, :item])) == shortestcovint(icc(boot))
+
+            lo, hi = confint(iccboot_subj; method=:equaltail)
             @test lo ≈ quantile(iccboot_subj, 0.025)
             @test hi ≈ quantile(iccboot_subj, 0.975)
 
-            @test_throws ArgumentError confint(boot, :subj; method=:bogus)
+            @test_throws ArgumentError confint(iccboot_subj; method=:bogus)
 
             # base MixedModels.jl `confint(::MixedModelBootstrap)` (no groups) is untouched
             @test Tables.istable(confint(boot))
@@ -79,8 +82,8 @@ end
         ci = shortestcovint(iccboot)
         @test first(ci) < icc(modelbern) < last(ci)
         @test iccboot ≈ icc(boot, Bernoulli(), Symbol("urban & dist"))
-        @test confint(boot, Bernoulli()) == ci
-        @test confint(boot, Bernoulli(), Symbol("urban & dist")) == ci
+        @test confint(iccboot) == ci
+        @test confint(icc(boot, Bernoulli(), Symbol("urban & dist"))) == ci
     end
 end
 
