@@ -71,6 +71,12 @@ function partial_fitted(model::GeneralizedLinearMixedModel{T},
     return type == :linpred ? y : broadcast!(Base.Fix1(linkinv, Link(model)), y, y)
 end
 
+function _coef_idx(names, selected, mode)
+    idx = BitVector(c in selected for c in names)
+    mode == :exclude && (idx = .!idx)
+    return idx
+end
+
 function _partial_fitted(model::MixedModel{T},
                          fe::AbstractVector{<:AbstractString},
                          re::Dict{Symbol}; mode) where {T}
@@ -79,34 +85,21 @@ function _partial_fitted(model::MixedModel{T},
     issubset(fe, coefnames(model)) ||
         throw(ArgumentError("specified FE names not subset of $(coefnames(model))"))
 
-    mode in [:include, :exclude] ||
+    mode in (:include, :exclude) ||
         throw(ArgumentError("Invalid mode: $(mode)."))
-    fe_idx = if isempty(fe)
-        BitVector(false for c in fixefnames(model))
-    else
-        BitVector(c in fe for c in fixefnames(model))
-    end
+    fe_idx = _coef_idx(fixefnames(model), fe, mode)
     @debug "" fe_idx
-    if mode == :exclude  
-        fe_idx = .!fe_idx
-        @debug "exclusion mode" fe_idx
-    end
     # XXX does this work properly for rank-deficient models?
     X = view(modelmatrix(model), :, fe_idx)
     vv = mul!(Vector{T}(undef, nobs(model)), X, view(fixef(model), fe_idx))
 
     for (rt, bb) in zip(model.reterms, ranef(model))
-        group = Symbol(string(rt.trm))
+        group = MixedModels.fname(rt)
         @debug group
-        if !isnothing(get(re, group, nothing))
+        if haskey(re, group)
             issubset(re[group], rt.cnames) ||
                 throw(ArgumentError("specified RE names for $(group) not subset of $(rt.cnames)"))
-            re_idx = if isempty(re[group])
-                BitVector(false for c in rt.cnames)
-            else
-                BitVector(c in re[group] for c in rt.cnames)
-            end
-            mode == :exclude && (re_idx = .!re_idx)
+            re_idx = _coef_idx(rt.cnames, re[group], mode)
         elseif mode == :exclude
             re_idx = trues(length(rt.cnames))
         else
@@ -114,12 +107,12 @@ function _partial_fitted(model::MixedModel{T},
         end
         @debug "" re_idx
         # nothing to do
-        if all(==(0), re_idx) 
+        if !any(re_idx)
             @debug "skipped"
             continue
         end
 
-        re_idx_reps = reduce(vcat, (re_idx for i in eachindex(rt.levels)))
+        re_idx_reps = repeat(re_idx, length(rt.levels))
         @debug "" re_idx_reps
         # XXX no appropriate mul! method
         # mul!(vv, view(rt, :, re_idx_reps), view(bb, re_idx, :), one(T), one(T))
