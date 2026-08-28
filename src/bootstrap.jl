@@ -25,7 +25,7 @@ original models is compared against this null distribution.
 This functionality may be deprecated in the future in favor of `StatsModels.lrtest`.
 """
 function bootstrap_lrt(rng::AbstractRNG, n::Integer, m0::MixedModel, ms::MixedModel...;
-                        optsum_overrides=(;), progress=true)
+                       optsum_overrides=(;), progress=true)
     y0 = copy(response(m0))
     ys = [copy(response(m)) for m in ms]
     local models
@@ -78,7 +78,7 @@ function bootstrap_lrt(rng::AbstractRNG, n::Integer, m0::MixedModel, ms::MixedMo
         end
     end
     lrt = StatsModels.LRTestResult(Int(nobs(m0)), Tuple(devs), Tuple(lls), Tuple(dofs),
-                                    (NaN, pvals...))
+                                   (NaN, pvals...))
     return MixedModels.LikelihoodRatioTest(Tuple(formulas), lrt,
-                                            first(models) isa LinearMixedModel)
+                                           first(models) isa LinearMixedModel)
 end
