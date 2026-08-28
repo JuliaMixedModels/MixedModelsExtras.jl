@@ -120,3 +120,41 @@ function _icc(tbl, groups::Union{Symbol,SymbolCollection}, σ²res)
     σ² = σ²res .+ _group_var(tbl)
     return σ²_α ./ σ²
 end
+
+function _icc_confint(values, level, method)
+    method in (:shortest, :equaltail) ||
+        throw(ArgumentError("`method` must be either :shortest or :equaltail."))
+    method === :shortest && return shortestcovint(values, level)
+    tails = ((1 - level) / 2, (1 + level) / 2)
+    return Tuple(quantile(values, tails))
+end
+
+"""
+    confint(boot::MixedModelBootstrap, groups; level::Real=0.95, method=:shortest)
+    confint(boot::MixedModelBootstrap, family, [groups]; level::Real=0.95, method=:shortest)
+
+Compute a bootstrap confidence interval for the [`icc`](@ref) computed from `boot`.
+
+The `groups` and `family` arguments are as for [`icc`](@ref).
+
+The keyword argument `level` is the confidence level (0.95 by default). The keyword
+argument `method` determines whether the `:shortest`, i.e. highest density, interval
+is used (the default) or the `:equaltail`, i.e. quantile-based, interval is used --
+matching the behavior of `confint(::MixedModelBootstrap)` from MixedModels.jl.
+"""
+function StatsBase.confint(boot::MixedModelBootstrap,
+                           groups::Union{Symbol,SymbolCollection};
+                           level::Real=0.95, method=:shortest)
+    return _icc_confint(icc(boot, groups), level, method)
+end
+
+function StatsBase.confint(boot::MixedModelBootstrap, family;
+                           level::Real=0.95, method=:shortest)
+    return _icc_confint(icc(boot, family), level, method)
+end
+
+function StatsBase.confint(boot::MixedModelBootstrap, family,
+                           groups::Union{Symbol,SymbolCollection};
+                           level::Real=0.95, method=:shortest)
+    return _icc_confint(icc(boot, family, groups), level, method)
+end

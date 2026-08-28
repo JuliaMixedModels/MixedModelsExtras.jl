@@ -5,7 +5,8 @@ include("set_up_tests.jl")
     Aqua.test_all(MixedModelsExtras; ambiguities=false,
                   piracies=(;
                             treat_as_own=[LinearMixedModel, MixedModel,
-                                          GeneralizedLinearMixedModel, RandomEffectsTerm]))
+                                          GeneralizedLinearMixedModel, RandomEffectsTerm,
+                                          MixedModelBootstrap]))
 end
 
 @testset "ICC" begin
