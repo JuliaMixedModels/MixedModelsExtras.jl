@@ -1,11 +1,11 @@
-using Aqua
-using LinearAlgebra
-using MixedModelsExtras
-using Test
+include("set_up_tests.jl")
 
 @testset "Aqua" begin
     # it's not piracy for StatsAPI.r2(::MixedModel), it's privateering!
-    Aqua.test_all(MixedModelsExtras; ambiguities=false, piracy=false)
+    Aqua.test_all(MixedModelsExtras; ambiguities=false,
+                  piracies=(;
+                            treat_as_own=[LinearMixedModel, MixedModel,
+                                          GeneralizedLinearMixedModel, RandomEffectsTerm]))
 end
 
 @testset "ICC" begin
@@ -26,4 +26,8 @@ end
 
 @testset "shrinkage" begin
     include("shrinkage.jl")
+end
+
+@testset "tables" begin
+    include("tables.jl")
 end

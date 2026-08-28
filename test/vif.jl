@@ -1,15 +1,3 @@
-using GLM
-using LinearAlgebra
-using MixedModels
-using MixedModelsExtras
-using StatsBase
-using Test
-
-using MixedModels: dataset
-using RDatasets: dataset as rdataset
-
-progress = false
-
 @testset "LMM" begin
     fm0 = fit(MixedModel, @formula(reaction ~ 0 + days + (1 | subj)), dataset(:sleepstudy);
               progress)

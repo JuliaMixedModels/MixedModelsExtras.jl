@@ -1,19 +1,8 @@
-using DataFrames
-using Distributions
-using MixedModels
-using MixedModels: dataset
-using MixedModelsExtras
-using StableRNGs
-using Statistics
-using Test
-
-progress = false
-
 @testset "LMM" begin
     model = fit(MixedModel, @formula(reaction ~ 1 + (1 | subj)), dataset(:sleepstudy);
                 progress)
     @test icc(model, :subj) == icc(model, [:subj]) == icc(model)
-    @test icc(model, :subj) ≈ 0.37918288
+    @test icc(model, :subj) ≈ 0.37918288 rtol = 1e-6
 
     formula = @formula(rt_trunc ~ 1 + spkr * prec * load +
                                   (1 + spkr | subj) +
@@ -22,7 +11,7 @@ progress = false
     @test icc(model, :subj) + icc(model, :item) ≈ icc(model)
 
     @testset "bootstrap" begin
-        boot = parametricbootstrap(StableRNG(42), 100, model; hide_progress=!progress)
+        boot = parametricbootstrap(StableRNG(42), 100, model; progress)
         iccboot_subj = icc(boot, :subj)
         iccboot_item = icc(boot, :item)
         @test iccboot_subj + iccboot_item ≈ icc(boot)
@@ -31,13 +20,26 @@ progress = false
         ci_item = shortestcovint(iccboot_item)
         @test first(ci_subj) < icc(model, :subj) < last(ci_subj)
         @test first(ci_item) < icc(model, :item) < last(ci_item)
+
+        # Regression test: per-iteration values must be in sorted iteration
+        # order so they align with boot.σ (residual σ, natural order).
+        iters = sort!(unique(row.iter for row in Tables.rows(boot.σs)))
+        σ²_subj_ref = [sum(abs2(row.σ)
+                           for row in Tables.rows(boot.σs)
+                           if row.iter == i && row.group == :subj; init=0.0)
+                       for i in iters]
+        σ²_all_ref = [sum(abs2(row.σ) for row in Tables.rows(boot.σs)
+                          if row.iter == i; init=0.0)
+                      for i in iters]
+        @test iccboot_subj ≈ σ²_subj_ref ./ (abs2.(boot.σ) .+ σ²_all_ref)
     end
 end
 
 @testset "Binomial" begin
     cbpp = dataset(:cbpp)
-    model = fit(MixedModel, @formula((incid / hsz) ~ 1 + (1 | herd)),
-                cbpp, Binomial(); wts=float(cbpp.hsz), progress)
+    # suppress depwarn on wts vs weights
+    model = @suppress fit(MixedModel, @formula((incid / hsz) ~ 1 + (1 | herd)),
+                          cbpp, Binomial(); wts=float(cbpp.hsz), progress)
     @test icc(model, :herd) == icc(model, [:herd]) == icc(model)
     @test icc(model, :herd) ≈ 0.1668 atol = 0.0005
 end
@@ -47,13 +49,15 @@ end
     modelbern = fit(MixedModel, @formula(use ~ 1 + (1 | urban & dist)),
                     contra, Bernoulli(); fast=true, progress)
     # force treating as a Binomial model
-    modelbin = fit(MixedModel, @formula(use ~ 1 + (1 | urban & dist)),
-                   contra, Binomial(); fast=true, wts=ones(length(contra.dist)), progress)
+    # suppress depwarn on wts vs weights
+    modelbin = @suppress fit(MixedModel, @formula(use ~ 1 + (1 | urban & dist)),
+                             contra, Binomial(); fast=true, wts=ones(length(contra.dist)),
+                             progress)
     # Bernoullis are a special case of binomial, so make sure they give the same answer
     @test icc(modelbern, Symbol("urban & dist")) ≈ icc(modelbin, Symbol("urban & dist"))
 
     @testset "bootstrap" begin
-        boot = parametricbootstrap(StableRNG(42), 100, modelbern; hide_progress=!progress)
+        boot = parametricbootstrap(StableRNG(42), 100, modelbern; progress)
         @test_throws ArgumentError icc(boot)
         iccboot = icc(boot, Bernoulli())
         ci = shortestcovint(iccboot)

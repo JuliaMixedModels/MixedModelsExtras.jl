@@ -30,7 +30,7 @@ model in this case, when determining whether each grouping variable contributes
 to overall fit? There is no single, clear, agreed-upon answer for these
 questions.  The bottom line is that there are many potential ways to define a
 coefficient of determination for linear mixed models (and even more for the
-generalzed case which combines all the problems of R² for GLM and for LMM) and
+generalized case which combines all the problems of R² for GLM and for LMM) and
 none of them have all the properties of the coefficient of determination for
 classical OLS regression.
 

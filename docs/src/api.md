@@ -54,3 +54,9 @@ shrinkagenorm
 ```@docs
 shrinkagetables
 ```
+
+## Tables
+
+```@docs
+ictable
+```
