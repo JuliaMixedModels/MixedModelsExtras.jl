@@ -34,6 +34,9 @@ function _ranef(m::GeneralizedLinearMixedModel, θref; uscale::Bool=false)
     return vv
 end
 
+_default_θref(m::LinearMixedModel) = 1e4 .* m.optsum.initial
+_default_θref(m::GeneralizedLinearMixedModel) = m.optsum.initial
+
 """
     shrinkagetables(m::MixedModel{T},
                     θref::AbstractVector{T}=(isa(m, LinearMixedModel) ? 1e4 : 1) .*
@@ -50,13 +53,12 @@ Each entry in the named tuple corresponds to a single grouping term.
     the passed model before restoring its original form.
 """
 function shrinkagetables(m::MixedModel{T},
-                         θref::AbstractVector{T}=(isa(m, LinearMixedModel) ? 1e4 : 1) .*
-                                                 m.optsum.initial;
+                         θref::AbstractVector{T}=_default_θref(m);
                          uscale::Bool=false) where {T}
 
     # BLUPs θref - same at estimated θ
     re = _ranef(m, θref; uscale) .- ranef(m; uscale)
-    return NamedTuple{fnames(m)}((map(MixedModels.retbl, re, m.reterms)...,))
+    return NamedTuple{fnames(m)}(map(MixedModels.retbl, re, m.reterms))
 end
 
 """
@@ -77,16 +79,14 @@ Each entry in the named tuple corresponds to a single grouping term.
     the passed model before restoring its original form.
 """
 function shrinkagenorm(m::MixedModel{T},
-                       θref::AbstractVector{T}=(isa(m, LinearMixedModel) ? 1e4 : 1) .*
-                                               m.optsum.initial;
+                       θref::AbstractVector{T}=_default_θref(m);
                        uscale::Bool=false, p::Real=2) where {T}
     reest = ranef(m; uscale)
     reref = _ranef(m, θref; uscale)
 
-    sh = map(zip(reref, reest, m.reterms)) do (ref, est, trm)
+    sh = map(reref, reest, m.reterms) do ref, est, trm
         shrinkage = norm.((view(ref, :, j) .- view(est, :, j) for j in axes(est, 2)), p)
-        return merge(NamedTuple{(MixedModels.fname(trm),)}((trm.levels,)),
-                     (; shrinkage))
+        return NamedTuple{(MixedModels.fname(trm), :shrinkage)}((trm.levels, shrinkage))
     end
     return NamedTuple{fnames(m)}(sh)
 end
