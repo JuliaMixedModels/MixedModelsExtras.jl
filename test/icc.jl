@@ -32,6 +32,22 @@
                           if row.iter == i; init=0.0)
                       for i in iters]
         @test iccboot_subj ≈ σ²_subj_ref ./ (abs2.(boot.σ) .+ σ²_all_ref)
+
+        @testset "confint" begin
+            @test confint(boot, :subj) == shortestcovint(iccboot_subj)
+            @test confint(boot, :subj) == shortestcovint(iccboot_subj, 0.95)
+            @test confint(boot, :subj; level=0.8) == shortestcovint(iccboot_subj, 0.8)
+            @test confint(boot, [:subj, :item]) == shortestcovint(icc(boot))
+
+            lo, hi = confint(boot, :subj; method=:equaltail)
+            @test lo ≈ quantile(iccboot_subj, 0.025)
+            @test hi ≈ quantile(iccboot_subj, 0.975)
+
+            @test_throws ArgumentError confint(boot, :subj; method=:bogus)
+
+            # base MixedModels.jl `confint(::MixedModelBootstrap)` (no groups) is untouched
+            @test Tables.istable(confint(boot))
+        end
     end
 end
 
@@ -63,6 +79,8 @@ end
         ci = shortestcovint(iccboot)
         @test first(ci) < icc(modelbern) < last(ci)
         @test iccboot ≈ icc(boot, Bernoulli(), Symbol("urban & dist"))
+        @test confint(boot, Bernoulli()) == ci
+        @test confint(boot, Bernoulli(), Symbol("urban & dist")) == ci
     end
 end
 

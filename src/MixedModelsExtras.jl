@@ -10,13 +10,14 @@ using Tables
 
 using MixedModels: replicate
 using GLM: linkinv, Link
+using MixedModels: replicate
 using StatsModels: termnames, vif, gvif
 export termnames, gvif, vif
 
 StatsModels.termnames(::RandomEffectsTerm) = String[]
 
 include("icc.jl")
-export icc
+export icc, confint
 
 include("r2.jl")
 export r², r2, adjr², adjr2
