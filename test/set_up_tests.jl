@@ -13,6 +13,7 @@ using Tables
 using Test
 
 using GLM: linkinv, Link
+using MixedModels: likelihoodratiotest
 using MixedModelsDatasets: dataset
 using MixedModelsExtras: _ranef
 using RDatasets: dataset as rdataset

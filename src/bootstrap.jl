@@ -7,14 +7,14 @@ Bootstrapped likelihood ratio test applied to a set of nested models.
 The first model is used to simulate `n` dataset replicates, where the ground truth is that
 specified by the first model. Each of the other models is then refit to those
 null data and the underlying distribution of deviance differences is then captured.
-For final computation of the p-values, the observed deviance is differencce between the 
+For final computation of the p-values, the observed difference in deviance  between the
 original models is compared against this null distribution.
 
 !!! note
-    The precision of the resulting p-value cannot exceed ``1/n``. 
+    The precision of the resulting p-value cannot exceed ``1/n``.
 
 !!! warn
-    This method is **not** thread safe. For efficiency , the models are modified 
+    This method is **not** thread safe. For efficiency , the models are modified
     during bootstrapping and the original fits are only restored at the end.
 
 !!! note
@@ -25,26 +25,23 @@ original models is compared against this null distribution.
 This functionality may be deprecated in the future in favor of `StatsModels.lrtest`.
 """
 function bootstrap_lrt(rng::AbstractRNG, n::Integer, m0::MixedModel, ms::MixedModel...;
-                          optsum_overrides=(;), progress=true)
+                        optsum_overrides=(;), progress=true)
     y0 = copy(response(m0))
     ys = [copy(response(m)) for m in ms]
     local models
-    local devs
-    local dofs
     local dofs
     local formulas
-    local dofdiffs
+    local devs
+    local lls
     local devdiffs
     local pvals
     try
         models = [m0; ms...]
+        models = models[sortperm(dof.(models))]
         dofs = dof.(models)
         formulas = string.(formula.(models))
-        ord = sortperm(dofs)
-        dofs = dofs[ord]
-        formulas = formulas[ord]
-        devs = deviance.(models)[ord]
-        dofdiffs = diff(dofs)
+        devs = deviance.(models)
+        lls = loglikelihood.(models)
         devdiffs = .-(diff(devs))
 
         for (key, val) in pairs(optsum_overrides)
@@ -53,16 +50,16 @@ function bootstrap_lrt(rng::AbstractRNG, n::Integer, m0::MixedModel, ms::MixedMo
                 setfield!(m.optsum, key, val)
             end
         end
-        nulldist = replicate(n; hide_progress=!progress) do
+        nulldist = replicate(n; progress) do
             simulate!(rng, m0)
             refit!(m0; progress=false)
             for m in ms
                 refit!(m, response(m0); progress=false)
             end
-            return [deviance(m) for m in models]
+            return deviance.(models)
         end
         nulldist = stack(nulldist; dims=1)
-        nulldist = diff(nulldist; dims=2)
+        nulldist = .-(diff(nulldist; dims=2))
         pvals = map(enumerate(devdiffs)) do (idx, dev)
             if dev > 0
                 mean(>=(dev), view(nulldist, :, idx))
@@ -70,8 +67,6 @@ function bootstrap_lrt(rng::AbstractRNG, n::Integer, m0::MixedModel, ms::MixedMo
                 NaN
             end
         end
-    catch ex
-        rethrow(ex)
     finally
         # restore the original fits
         if progress
@@ -82,9 +77,8 @@ function bootstrap_lrt(rng::AbstractRNG, n::Integer, m0::MixedModel, ms::MixedMo
             refit!(m, y; progress=false)
         end
     end
-    return MixedModels.LikelihoodRatioTest(formulas,
-                                           (dof=dofs, deviance=devs),
-                                           (dofdiff=dofdiffs, deviancediff=devdiffs,
-                                            pvalues=pvals),
-                                           first(models) isa LinearMixedModel)
+    lrt = StatsModels.LRTestResult(Int(nobs(m0)), Tuple(devs), Tuple(lls), Tuple(dofs),
+                                    (NaN, pvals...))
+    return MixedModels.LikelihoodRatioTest(Tuple(formulas), lrt,
+                                            first(models) isa LinearMixedModel)
 end
