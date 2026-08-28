@@ -1,5 +1,23 @@
 const SymbolCollection = Union{Symbol,Tuple{Symbol,Vararg{Symbol}},AbstractVector{Symbol}}
 
+"""
+    IccBootstrap{T} <: AbstractVector{T}
+
+Thin wrapper around the per-iteration ICC values computed by [`icc`](@ref) from a
+`MixedModelBootstrap`. Behaves like the underlying vector for all `AbstractArray`
+purposes (indexing, iteration, `sort`, `quantile`, etc.), but is a distinct type so
+that [`confint`](@ref) can be specialized for it without pirating `MixedModelBootstrap`.
+"""
+struct IccBootstrap{T} <: AbstractVector{T}
+    values::Vector{T}
+end
+
+Base.size(x::IccBootstrap) = size(x.values)
+Base.getindex(x::IccBootstrap, i::Int) = getindex(x.values, i)
+Base.setindex!(x::IccBootstrap, v, i::Int) = setindex!(x.values, v, i)
+Base.IndexStyle(::Type{<:IccBootstrap}) = IndexLinear()
+Base.similar(x::IccBootstrap, ::Type{S}, dims::Dims) where {S} = similar(x.values, S, dims)
+
 function _group_var(vc::VarCorr, group::Symbol)
     return sum(abs2, vc.σρ[group].σ)
 end
@@ -105,13 +123,13 @@ function icc(boot::MixedModelBootstrap,
              groups::Union{Symbol,SymbolCollection})
     all(ismissing, boot.σ) &&
         throw(ArgumentError("Bootstrapping GLMM requires specifying the family."))
-    return _icc(boot.σs, groups, abs2.(boot.σ))
+    return IccBootstrap(_icc(boot.σs, groups, abs2.(boot.σ)))
 end
 
 function icc(boot::MixedModelBootstrap, family,
              groups::Union{Symbol,SymbolCollection})
     σ²res = _residual_variance(family)
-    return _icc(boot.σs, groups, σ²res)
+    return IccBootstrap(_icc(boot.σs, groups, σ²res))
 end
 
 function _icc(tbl, groups::Union{Symbol,SymbolCollection}, σ²res)
@@ -121,40 +139,21 @@ function _icc(tbl, groups::Union{Symbol,SymbolCollection}, σ²res)
     return σ²_α ./ σ²
 end
 
-function _icc_confint(values, level, method)
-    method in (:shortest, :equaltail) ||
-        throw(ArgumentError("`method` must be either :shortest or :equaltail."))
-    method === :shortest && return shortestcovint(values, level)
-    tails = ((1 - level) / 2, (1 + level) / 2)
-    return Tuple(quantile(values, tails))
-end
-
 """
-    confint(boot::MixedModelBootstrap, groups; level::Real=0.95, method=:shortest)
-    confint(boot::MixedModelBootstrap, family, [groups]; level::Real=0.95, method=:shortest)
+    confint(icc_boot::IccBootstrap; level::Real=0.95, method=:shortest)
 
-Compute a bootstrap confidence interval for the [`icc`](@ref) computed from `boot`.
-
-The `groups` and `family` arguments are as for [`icc`](@ref).
+Compute a bootstrap confidence interval for an [`IccBootstrap`](@ref), i.e. the
+result of calling [`icc`](@ref) on a `MixedModelBootstrap`.
 
 The keyword argument `level` is the confidence level (0.95 by default). The keyword
 argument `method` determines whether the `:shortest`, i.e. highest density, interval
 is used (the default) or the `:equaltail`, i.e. quantile-based, interval is used --
 matching the behavior of `confint(::MixedModelBootstrap)` from MixedModels.jl.
 """
-function StatsBase.confint(boot::MixedModelBootstrap,
-                           groups::Union{Symbol,SymbolCollection};
-                           level::Real=0.95, method=:shortest)
-    return _icc_confint(icc(boot, groups), level, method)
-end
-
-function StatsBase.confint(boot::MixedModelBootstrap, family;
-                           level::Real=0.95, method=:shortest)
-    return _icc_confint(icc(boot, family), level, method)
-end
-
-function StatsBase.confint(boot::MixedModelBootstrap, family,
-                           groups::Union{Symbol,SymbolCollection};
-                           level::Real=0.95, method=:shortest)
-    return _icc_confint(icc(boot, family, groups), level, method)
+function StatsBase.confint(icc_boot::IccBootstrap; level::Real=0.95, method=:shortest)
+    method in (:shortest, :equaltail) ||
+        throw(ArgumentError("`method` must be either :shortest or :equaltail."))
+    method === :shortest && return shortestcovint(icc_boot, level)
+    tails = ((1 - level) / 2, (1 + level) / 2)
+    return Tuple(quantile(icc_boot, tails))
 end
