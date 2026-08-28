@@ -28,6 +28,10 @@ end
     include("shrinkage.jl")
 end
 
+@testset "bootstrap" begin
+    include("bootstrap.jl")
+end
+
 @testset "tables" begin
     include("tables.jl")
 end
