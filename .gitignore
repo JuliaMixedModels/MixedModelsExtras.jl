@@ -27,3 +27,4 @@ Manifest-v*.toml
 # Editor files
 .vscode/*
 *~
+coverage/lcov.info
