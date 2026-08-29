@@ -26,10 +26,16 @@ adjr2(::LinearMixedModel)
 icc
 ```
 
+## Bootstrapped Likelihood Ratio Test
+
+```@docs
+bootstrap_lrt
+```
+
 ## Variance Inflation Factor
 
 ```@docs
-vif(::MixedModel)
+vif
 ```
 
 ```@docs
@@ -37,7 +43,7 @@ termnames(::MixedModel)
 ```
 
 ```@docs
-gvif(::MixedModel)
+gvif
 ```
 
 ## "Partial" Effects
