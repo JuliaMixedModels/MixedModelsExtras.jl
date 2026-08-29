@@ -11,11 +11,11 @@ DocTestFilters = [r"([a-z]*) => \1", r"getfield\(.*##[0-9]+#[0-9]+"]
 ## Coefficient of Determination
 
 ```@docs
-r2
+r2(::LinearMixedModel)
 ```
 
 ```@docs
-adjr2
+adjr2(::LinearMixedModel)
 ```
 
 
