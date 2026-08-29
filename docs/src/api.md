@@ -28,15 +28,15 @@ icc
 ## Variance Inflation Factor
 
 ```@docs
-vif
+vif(::MixedModel)
 ```
 
 ```@docs
-termnames
+termnames(::MixedModel)
 ```
 
 ```@docs
-gvif
+gvif(::MixedModel)
 ```
 
 ## "Partial" Effects
