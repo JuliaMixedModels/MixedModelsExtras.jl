@@ -1,6 +1,8 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 MixedModelsExtras = "781a26e1-49f4-409a-8f4c-c3159d78c17e"
+StatsAPI = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
+StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 
 [compat]
 Documenter = "1.3"
