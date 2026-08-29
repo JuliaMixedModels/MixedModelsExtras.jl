@@ -13,7 +13,7 @@ original models is compared against this null distribution.
 !!! note
     The precision of the resulting p-value cannot exceed ``1/n``.
 
-!!! warn
+!!! warning
     This method is **not** thread safe. For efficiency , the models are modified
     during bootstrapping and the original fits are only restored at the end.
 

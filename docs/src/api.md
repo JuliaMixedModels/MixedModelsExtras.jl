@@ -1,5 +1,6 @@
 ```@meta
 CurrentModule = MixedModelsExtras
+CollapsedDocStrings = true
 DocTestSetup = quote
     using MixedModelsExtras
 end
@@ -11,11 +12,11 @@ DocTestFilters = [r"([a-z]*) => \1", r"getfield\(.*##[0-9]+#[0-9]+"]
 ## Coefficient of Determination
 
 ```@docs
-r2
+r2(::LinearMixedModel)
 ```
 
 ```@docs
-adjr2
+adjr2(::LinearMixedModel)
 ```
 
 
@@ -25,6 +26,12 @@ adjr2
 icc
 ```
 
+## Bootstrapped Likelihood Ratio Test
+
+```@docs
+bootstrap_lrt
+```
+
 ## Variance Inflation Factor
 
 ```@docs
@@ -32,7 +39,7 @@ vif
 ```
 
 ```@docs
-termnames
+termnames(::MixedModel)
 ```
 
 ```@docs
