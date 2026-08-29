@@ -1,5 +1,6 @@
 ```@meta
 CurrentModule = MixedModelsExtras
+CollapsedDocStrings = true
 DocTestSetup = quote
     using MixedModelsExtras
 end
