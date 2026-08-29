@@ -7,6 +7,6 @@ makedocs(;
          doctest=true,
          checkdocs=:exports,
          warnonly=[:cross_references],
-         pages=["index.md", "api.md"])
+         pages=["index.md", "icc.md", "api.md"])
 
 deploydocs(; repo="github.com/JuliaMixedModels/MixedModelsExtras.jl.git", push_preview=true)

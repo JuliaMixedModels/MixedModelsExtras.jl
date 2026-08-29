@@ -1,20 +1,24 @@
 module MixedModelsExtras
 
+using Distributions
 using LinearAlgebra
 using MixedModels
 using Random
+using SpecialFunctions
 using Statistics
 using StatsBase
 using StatsModels
 using Tables
 
-using MixedModels: replicate
-using GLM: linkinv, Link
-using MixedModels: replicate
+using MixedModels: replicate, fname
+using GLM: linkinv, Link, LogitLink, ProbitLink, CloglogLink, LogLink
 using StatsModels: termnames, vif, gvif
 export termnames, gvif, vif
 
 StatsModels.termnames(::RandomEffectsTerm) = String[]
+
+include("interrater.jl")
+export InterraterICC, InterraterICCTable
 
 include("icc.jl")
 export icc, confint, IccBootstrap

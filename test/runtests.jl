@@ -12,6 +12,10 @@ end
     include("icc.jl")
 end
 
+@testset "inter-rater ICC" begin
+    include("interrater.jl")
+end
+
 @testset "r2" begin
     include("r2.jl")
 end
