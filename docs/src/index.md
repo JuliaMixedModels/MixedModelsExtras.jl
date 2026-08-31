@@ -8,6 +8,7 @@ CurrentModule = MixedModelsExtras
 
 ```@contents
 Pages = [
+        "icc.md",
         "api.md",
 ]
 Depth = 1

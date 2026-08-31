@@ -20,10 +20,25 @@ adjr2(::LinearMixedModel)
 ```
 
 
-## Intra-Class Correlation Coefficient
+## Intraclass Correlation Coefficient
+
+See [Intraclass Correlation Coefficients](@ref) for the taxonomy of coefficients, guidance
+on choosing between them, and references.
 
 ```@docs
 icc
+```
+
+```@docs
+InterraterICC
+```
+
+```@docs
+InterraterICCTable
+```
+
+```@docs
+IccBootstrap
 ```
 
 ## Bootstrapped Likelihood Ratio Test
