@@ -19,4 +19,12 @@ using MixedModelsDatasets: dataset
 using MixedModelsExtras: _ranef
 using RDatasets: dataset as rdataset
 
-progress = false
+const progress = Base.isinteractive()
+
+macro suppress_in_ci(ex)
+    if Base.isinteractive()
+        return esc(ex)
+    else
+        return :(@suppress $(esc(ex)))
+    end
+end
